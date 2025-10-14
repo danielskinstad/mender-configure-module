@@ -58,6 +58,11 @@ test:integration:
     - wget "https://downloads.mender.io/repos/workstation-tools/pool/main/m/mender-artifact/mender-artifact_${MENDER_ARTIFACT_VERSION}-1%2bubuntu%2bnoble_amd64.deb"
       --output-document mender-artifact.deb
     - dpkg --extract mender-artifact.deb /
+    # Increase system limits to make sure the tests are not limited while
+    # running with high parallelism on a single VM
+    - sysctl -w fs.inotify.max_user_instances=1024
+    - sysctl -w fs.file-max=600000
+    - ulimit -n 524288
   script:
     - cd tests/integration/
     - GENERATE_PYTEST_REPORT=true ./run.sh
